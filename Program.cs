@@ -2,6 +2,8 @@ using Dapper;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using CapstoneAPI.Model;
+using Swashbuckle;
+
 
 namespace CapstoneAPI
 {
@@ -15,7 +17,9 @@ namespace CapstoneAPI
             builder.Services.AddAuthorization();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            //builder.Services.AddOpenApi();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddEndpointsApiExplorer();
 
             var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddScoped<IDbConnection>(x => new SqlConnection(defaultConnectionString));
@@ -28,7 +32,9 @@ namespace CapstoneAPI
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                //app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
