@@ -1,6 +1,7 @@
 using Dapper;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using CapstoneAPI.Model;
 
 namespace CapstoneAPI
 {
@@ -16,7 +17,13 @@ namespace CapstoneAPI
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddScoped<IDbConnection>(x => new SqlConnection(defaultConnectionString));
+
             var app = builder.Build();
+            
+
+            
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -33,10 +40,11 @@ namespace CapstoneAPI
            
 
 
-            app.MapPost("/api/albums", async (IDbConnection db, PhotoAlbumModel album) =>
+            app.MapPost("/api/usercreation", async (IDbConnection db, UserLoginModal user) =>
             {
-                var result = await db.ExecuteAsync("INSERT INTO PhotoAlbumDb.dbo.PhotoAlbums (AlbumName, Description) VALUES (@AlbumName, @Description)", album);
-                return Results.Created($"/api/photos/{album.AlbumId}", album);
+                var result = await db.ExecuteAsync("INSERT INTO InventoryDb.dbo.Users (username, user_password) VALUES (@UserName, @UserPassword)", user);
+                //return Results.Created($"/api/photos/", user);
+                return Results.Created();
             });
 
             app.Run();
