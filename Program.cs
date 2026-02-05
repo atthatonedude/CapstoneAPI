@@ -41,14 +41,14 @@ namespace CapstoneAPI
 
             app.UseAuthorization();
 
-           
 
-           
 
+
+            
 
             app.MapPost("/api/usercreation", async (IDbConnection db, UserLoginModal user) =>
             {
-                var result = await db.ExecuteAsync("INSERT INTO InventoryDb.dbo.Users (username, user_password) VALUES (@UserName, @UserPassword)", user);
+                var result = await db.ExecuteAsync("INSERT INTO InventoryDb.dbo.Users (username, user_password, user_isactive) VALUES (@UserName, @UserPassword,@IsActive)", user);
                 //return Results.Created($"/api/photos/", user);
                 return Results.Created();
             });
