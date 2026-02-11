@@ -51,7 +51,7 @@ namespace CapstoneAPI
             app.MapPost("/api/usercreation", async (IDbConnection db, UserLoginModal user) =>
             {
 
-                var result = await db.ExecuteAsync("INSERT INTO InventoryDb.dbo.Users (username, user_password, user_isactive) VALUES (@UserName, @UserPassword,@IsActive)", user);
+                var result = await db.ExecuteAsync("INSERT INTO Inventorydatabase.dbo.Users (username, user_password, user_isactive) VALUES (@UserName, @UserPassword,@IsActive)", user);
 
                 return Results.Created();
             });
@@ -61,9 +61,11 @@ namespace CapstoneAPI
             app.MapGet("/api/userlogin", async ([FromServices] IDbConnection db, [FromQuery] string username, [FromQuery] string password) =>
             {
                 var result = await db.QueryFirstOrDefaultAsync(
-                    "SELECT * FROM InventoryDb.dbo.Users WHERE username = @username AND user_password = @password",
+                    "SELECT * FROM Inventorydatabase.dbo.Users WHERE username = @username AND user_password = @password",
                     new { username, password }
                 );
+
+                
 
                 return result is not null
                     ? Results.Ok()
