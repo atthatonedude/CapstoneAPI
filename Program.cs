@@ -72,6 +72,20 @@ namespace CapstoneAPI
                     : Results.NotFound();
             });
 
+            //Uses GET to retrive specified items from the database and returns them as a list of items.
+            // Get all component items for a specific Bill of Materials (parent item)
+            app.MapGet("/api/getitems", async ([FromServices] IDbConnection db, [FromQuery] int searchedpartnumber) =>
+            {
+                var result = await db.QueryAsync<ItemModel>(
+                    "SELECT i.* " +
+                    "FROM Inventorydatabase.dbo.Item i " +
+                    "INNER JOIN Inventorydatabase.dbo.BillOfMaterials bom ON i.item_id = bom.Item_Id " +
+                    "WHERE bom.Item_Id = @ParentItemId",
+                    new { ParentItemId = searchedpartnumber }
+                );
+
+                return Results.Ok(result);
+            });
 
             app.Run();
         }
