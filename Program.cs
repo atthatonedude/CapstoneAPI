@@ -1,9 +1,10 @@
-using Dapper;
-using System.Data;
-using Microsoft.Data.SqlClient;
 using CapstoneAPI.Model;
-using Swashbuckle;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Swashbuckle;
+using System.Data;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 
 
@@ -27,9 +28,9 @@ namespace CapstoneAPI
             builder.Services.AddScoped<IDbConnection>(x => new SqlConnection(defaultConnectionString));
 
             var app = builder.Build();
-            
 
-            
+
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -65,7 +66,7 @@ namespace CapstoneAPI
                     new { username, password }
                 );
 
-                
+
 
                 return result is not null
                     ? Results.Ok()
@@ -77,15 +78,38 @@ namespace CapstoneAPI
             app.MapGet("/api/getitems", async ([FromServices] IDbConnection db, [FromQuery] int searchedpartnumber) =>
             {
                 var result = await db.QueryAsync<ItemModel>(
-                    "SELECT i.* " +
-                    "FROM Inventorydatabase.dbo.Item i " +
-                    "INNER JOIN Inventorydatabase.dbo.BillOfMaterials bom ON i.item_id = bom.Item_Id " +
-                    "WHERE bom.Item_Id = @ParentItemId",
+                    @"SELECT 
+                      i.item_id        AS ItemId,
+                      i.item_description AS ItemDescription,
+                      i.item_quantity  AS ItemQuantity,
+                      i.item_partnumber AS ItemPartNumber
+                        FROM Inventorydatabase.dbo.Item i
+                        INNER JOIN Inventorydatabase.dbo.BillOfMaterials bom 
+                      ON i.item_id = bom.Item_Id
+                         WHERE bom.FinishedGood_Id = @ParentItemId",
                     new { ParentItemId = searchedpartnumber }
                 );
 
                 return Results.Ok(result);
             });
+
+
+            app.MapGet("/api/getmaxbuildqty", async (
+                [FromServices] IDbConnection db,
+                 [FromQuery] int parentItemId) =>
+                {
+                var result = await db.QueryFirstOrDefaultAsync<int?>(
+                    @"SELECT
+                    MIN(FLOOR(p.item_quantity / b.QtyRequiredPerFG)) AS MaxBuildableQty
+                     FROM BillOfMaterials b
+                    JOIN Item p ON p.item_id = b.Item_Id
+                     WHERE b.FinishedGood_Id = @ParentItemId
+                 GROUP BY b.FinishedGood_Id;",
+                    new { ParentItemId = parentItemId });
+
+                return Results.Ok(result ?? 0);
+            });
+
 
             app.Run();
         }
