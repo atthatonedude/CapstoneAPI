@@ -1,5 +1,6 @@
 using CapstoneAPI.Model;
 using Dapper;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Swashbuckle;
@@ -24,7 +25,7 @@ namespace CapstoneAPI
             builder.Services.AddSwaggerGen();
             builder.Services.AddEndpointsApiExplorer();
 
-            var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var defaultConnectionString = builder.Configuration.GetConnectionString("DatabaseConnection");
             builder.Services.AddScoped<IDbConnection>(x => new SqlConnection(defaultConnectionString));
 
             var app = builder.Build();
@@ -39,6 +40,11 @@ namespace CapstoneAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             app.UseHttpsRedirection();
 
