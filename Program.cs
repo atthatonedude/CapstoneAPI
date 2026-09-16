@@ -3,10 +3,8 @@ using Dapper;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Swashbuckle;
 using System.Data;
 using System.Text.RegularExpressions;
-using System.Web.Http;
 
 
 namespace CapstoneAPI
